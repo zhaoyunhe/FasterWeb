@@ -50,7 +50,19 @@
                     >删除分组
                     </el-button>
 
+
                     <el-button
+                        :disabled="currentNode === '' "
+                        type="info"
+                        size="small"
+                        icon="el-icon-edit-outline"
+                        @click="renameNode"
+                    >节点重命名
+                    </el-button>
+
+
+                    <el-button
+                        style="margin-left: 100px"
                         :disabled="currentNode === '' "
                         type="warning"
                         size="small"
@@ -103,31 +115,12 @@
                     ></el-button>
 
 
-                    <el-tooltip class="item" effect="dark" content="环境信息" placement="top-start">
-                        <el-button plain size="small" icon="el-icon-view"></el-button>
-                    </el-tooltip>
-
-                    <el-select
-                        placeholder="请选择"
-                        size="small"
-                        tyle="margin-left: -6px"
-                        :disabled="currentNode === ''"
-                        v-model="currentConfig"
-                    >
-                        <el-option
-                            v-for="item in configOptions"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-
                 </div>
             </div>
         </el-header>
 
         <el-container>
-            <el-aside style="margin-top: 10px;" >
+            <el-aside style="margin-top: 10px;">
                 <div class="nav-api-side">
                     <div class="api-tree">
                         <el-input
@@ -168,7 +161,6 @@
                     :nodeId="currentNode.id"
                     :project="$route.params.id"
                     :response="response"
-                    :config="currentConfig"
                     v-on:addSuccess="handleAddSuccess"
                 >
                 </api-body>
@@ -182,7 +174,6 @@
                     :del="del"
                     :back="back"
                     :run="run"
-                    :config="currentConfig"
                 >
                 </api-list>
 
@@ -285,7 +276,6 @@
                 },
                 radio: '根节点',
                 addAPIFlag: false,
-                currentConfig: '',
                 treeId: '',
                 maxId: '',
                 dialogVisible: false,
@@ -294,11 +284,10 @@
                 filterText: '',
                 expand: '&#xe65f;',
                 dataTree: [],
-                configOptions: []
             }
         },
         methods: {
-            handleDragEnd(){
+            handleDragEnd() {
                 this.updateTree(false);
             },
             handleAddSuccess() {
@@ -324,17 +313,6 @@
                 })
             },
 
-            getConfig() {
-                this.$api.getAllConfig(this.$route.params.id).then(resp => {
-                    this.configOptions = resp;
-                    this.configOptions.push({"name": "请选择", id: ''})
-                }).catch(resp => {
-                    this.$message.error({
-                        message: '服务器连接超时，请重试',
-                        duration: 1000
-                    })
-                })
-            },
 
             updateTree(mode) {
                 this.$api.updateTree(this.treeId, {
@@ -344,7 +322,6 @@
                     type: 1
                 }).then(resp => {
                     if (resp['success']) {
-                        this.$message.success(resp['msg']);
                         this.dataTree = resp['tree'];
                         this.maxId = resp['max'];
                     } else {
@@ -377,6 +354,22 @@
 
                 })
             },
+
+            renameNode() {
+                this.$prompt('请输入节点名', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputPattern:  /\S/,
+                    inputErrorMessage: '节点名称不能为空'
+                }).then(({ value }) => {
+                    const parent = this.data.parent;
+                    const children = parent.data.children || parent.data;
+                    const index = children.findIndex(d => d.id === this.currentNode.id);
+                    children[index]["label"] = value
+                    this.updateTree(false);
+                });
+            },
+
 
             handleConfirm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -422,7 +415,6 @@
         name: "RecordApi",
         mounted() {
             this.getTree();
-            this.getConfig();
         }
     }
 </script>

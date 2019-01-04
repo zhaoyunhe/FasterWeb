@@ -52,8 +52,19 @@
                     </el-button>
 
                     <el-button
+                        :disabled="currentNode === '' "
+                        type="info"
+                        size="small"
+                        icon="el-icon-edit-outline"
+                        @click="renameNode"
+                    >节点重命名
+                    </el-button>
+
+
+                    <el-button
                         type="warning"
                         size="small"
+                        style="margin-left: 100px"
                         icon="el-icon-circle-plus-outline"
                         @click="buttonActivate=false"
                         :disabled="buttonActivate"
@@ -101,7 +112,7 @@
                     <el-tooltip
                         class="item"
                         effect="dark"
-                        content="环境信息"
+                        content="可选配置"
                         placement="top-start"
                     >
                         <el-button plain size="small" icon="el-icon-view"></el-button>
@@ -113,12 +124,13 @@
                         size="small"
                         tyle="margin-left: -6px"
                         v-model="currentConfig"
+                        :disabled="addTestActivate"
                     >
                         <el-option
                             v-for="item in configOptions"
                             :key="item.id"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.name">
                         </el-option>
                     </el-select>
 
@@ -181,7 +193,6 @@
                     :project="$route.params.id"
                     :node="currentNode.id"
                     :del="del"
-                    :config="currentConfig"
                     v-on:testStep="handleTestStep"
                     :back="back"
                     :run="run"
@@ -269,7 +280,6 @@
             getConfig() {
                 this.$api.getAllConfig(this.$route.params.id).then(resp => {
                     this.configOptions = resp;
-                    this.configOptions.push({"name": "请选择", id: ''})
                 }).catch(resp => {
                     this.$message.error({
                         message: '服务器连接超时，请重试',
@@ -308,7 +318,6 @@
                     type: 2
                 }).then(resp => {
                     if (resp['success']) {
-                        this.$message.success(resp['msg']);
                         this.dataTree = resp['tree'];
                         this.maxId = resp['max'];
                     } else {
@@ -320,6 +329,20 @@
                         duration: 1000
                     })
                 })
+            },
+            renameNode() {
+                this.$prompt('请输入节点名', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputPattern:  /\S/,
+                    inputErrorMessage: '节点名称不能为空'
+                }).then(({ value }) => {
+                    const parent = this.data.parent;
+                    const children = parent.data.children || parent.data;
+                    const index = children.findIndex(d => d.id === this.currentNode.id);
+                    children[index]["label"] = value
+                    this.updateTree(false);
+                });
             },
 
             deleteNode() {

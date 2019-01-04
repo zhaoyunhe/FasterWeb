@@ -2,7 +2,7 @@ import axios from 'axios'
 import store from '../store/state'
 import router from '../router'
 
-let baseUrl = "http://localhost:8000";
+export const baseUrl = "http://localhost:8000";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = baseUrl;
@@ -199,8 +199,8 @@ export const runSingleAPI = params => {
     return axios.post('/api/fastrunner/run_api/', params).then(res => res.data)
 };
 
-export const runAPIByPk = (url, params) => {
-    return axios.get('/api/fastrunner/run_api_pk/' + url + '/', params).then(res => res.data)
+export const runAPIByPk = url => {
+    return axios.get('/api/fastrunner/run_api_pk/' + url + '/').then(res => res.data)
 };
 
 export const runAPITree = params => {
@@ -223,4 +223,47 @@ export const runSuiteTree = params => {
     return axios.post('/api/fastrunner/run_suite_tree/', params).then(res => res.data)
 };
 
+export const addVariables = params => {
+    return axios.post('/api/fastrunner/variables/', params).then(res => res.data)
+};
 
+export const variablesList = params => {
+    return axios.get('/api/fastrunner/variables/', params).then(res => res.data)
+};
+
+export const getVariablesPaginationBypage = params => {
+    return axios.get('/api/fastrunner/variables/', params).then(res => res.data)
+};
+
+
+export const updateVariables = (url, params) => {
+    return axios.patch('/api/fastrunner/variables/' + url + '/', params).then(res => res.data)
+};
+
+export const deleteVariables = url => {
+    return axios.delete('/api/fastrunner/variables/' + url + '/').then(res => res.data)
+};
+
+export const delAllVariabels = params => {
+    return axios.delete('/api/fastrunner/variables/', params).then(res => res.data)
+};
+
+export const reportList = params => {
+    return axios.get('/api/fastrunner/reports/', params).then(res => res.data)
+};
+
+export const deleteReports = url => {
+    return axios.delete('/api/fastrunner/reports/' + url + '/').then(res => res.data)
+};
+
+export const getReportsPaginationBypage = params => {
+    return axios.get('/api/fastrunner/reports/', params).then(res => res.data)
+};
+
+export const delAllReports = params => {
+    return axios.delete('/api/fastrunner/reports/', params).then(res => res.data)
+};
+
+export const watchSingleReports = url => {
+    return axios.get('/api/fastrunner/reports/' + url + '/').then(res => res.data)
+};
